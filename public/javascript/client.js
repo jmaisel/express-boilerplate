@@ -1,22 +1,46 @@
-function getData(uri, mimeType){
+/**
+ * Fetch data from the server
+ * 
+ * @param uri the ReST endpoint
+ * @param dataType
+ * @returns
+ */
+function getData(uri, dataType, async, callback){
 	var result = null;
-	var params = {
-		async: false,
+	
+	$.ajax({
+		async: async,
 		url: uri,
-		dataType: mimeType || "json",
-		success : function(data){
+		dataType: dataType || "json",
+		success : async?function(data){
 			result = data;
-		}
-	};
-	console.log( params );
-	$.ajax(params);
+		}:callback
+	});
 	
 	return result;
 }
 
+/**
+ * Render a template to one or more elements
+ * @param targetEl jquery selector for target elements
+ * @param tmplName template name
+ * @param data data to use rendering the template
+ */
 function renderTemplate(targetEl, tmplName, data){
-	//jade.render(domNode, templateName, data);
 	var tmpl = Templates[tmplName];
-	console.log( tmpl );
-	tmpl.render(targetEl, tmplName, data);
+	$(targetEl).html(tmpl(data));
 }
+
+var View = function(){
+	
+	var that = {
+			
+	};
+	
+	return that;
+}
+
+
+
+
+

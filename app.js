@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -9,8 +8,23 @@ var express = require('express');
 var routes = require('./routes');
 var user = require('./routes/user');
 var template = require('./routes/template');
+var Schema = require('./orm/Schema.js');
+var Domain = require('./orm/DataModel.js');
 
 var app = express();
+
+Schema.connect({
+	schema: "boilerplate_dev",
+	username: "root",
+	password: "",
+	host: "localhost",
+	port: 3306,
+	dialect: "mysql"
+});
+
+//Schema.dropTables();
+Domain();
+Schema.sync();
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -27,13 +41,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
 if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
+	app.use(express.errorHandler());
 }
 
 app.get('/', routes.index);
 app.get('/users', user.list);
 app.get('/template/*', template.list);
 
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+http.createServer(app).listen(app.get('port'), function() {
+	console.log('Express server listening on port ' + app.get('port'));
 });
