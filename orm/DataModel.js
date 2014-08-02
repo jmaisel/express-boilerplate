@@ -9,7 +9,7 @@ module.exports = function(){
 	/**
 	 * Roles
 	 */
-	var SystemRole = Schema.add('system_roles', {
+	var foo = Schema.add('system_roles', {
 		name: {
 			type: Sequelize.STRING,
 			unique: true
@@ -19,7 +19,7 @@ module.exports = function(){
 	/**
 	 * Users
 	 */
-	var SystemUser = Schema.add('system_users', {
+	Schema.add('system_users', {
 		username: Sequelize.STRING,
 		fname: Sequelize.STRING,
 		lname: Sequelize.STRING,
@@ -39,11 +39,12 @@ module.exports = function(){
 	/**
 	 * Posts
 	 */
-	var Post = Schema.add('blog_posts', {
+	Schema.add('blog_posts', {
 		title: Sequelize.STRING,
 		points: Sequelize.INTEGER,
 		content: Sequelize.TEXT,
-		user: {
+		user_id: {
+			field: "user",
 			type: Sequelize.INTEGER,
 			references: "system_users",
 			referencesKey: "id"
@@ -53,15 +54,17 @@ module.exports = function(){
 	/**
 	 * Comments
 	 */
-	var Comment = Schema.add('blog_comments', {
+	Schema.add('blog_comments', {
 		content: Sequelize.STRING,
 		points: Sequelize.INTEGER,
-		parent: {
+		parent_id: {
+			field: "parent",
 			type: Sequelize.INTEGER,
 			references: "blog_comments",
 			referencesKey: "id"
 		},
-		user: {
+		user_id: {
+			field: "user",
 			type: Sequelize.INTEGER,
 			references: "system_users",
 			referencesKey: "id"
