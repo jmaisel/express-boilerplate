@@ -9,7 +9,7 @@ var routes = require('./routes');
 var user = require('./routes/user');
 var template = require('./routes/template');
 var Schema = require('./orm/Schema.js');
-var Domain = require('./orm/DataModel.js');
+var loadDomainModel = require('./orm/DataModel.js');
 
 var app = express();
 
@@ -19,17 +19,35 @@ Schema.connect({
 	password: "",
 	host: "localhost",
 	port: 3306,
-	dialect: "mysql"
+	dialect: "mysql",
+	logging: console.log,
+	callback: function(err){
+		console.log((err ? "Error " + err + ".  Not" : "") + " Connected");
+		
+		if( err ){
+			return;
+		}
+		
+		var role = Schema.build('system_roles', {
+			name: "Developers"
+		});
+		
+		role.save().complete(function(){
+			console.log(err?"not saved " + err:"saved");
+		});
+
+		console.log( role.get("name") );
+	}
 });
 
-//Schema.dropTables();
-Domain();
+loadDomainModel();
 Schema.sync();
 
 // all environments
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+//app.set('Schema', Schema);
 
 app.use(express.favicon());
 app.use(express.logger('dev'));
@@ -40,7 +58,7 @@ app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
-if ('development' == app.get('env')) {
+if ('development' === app.get('env')) {
 	app.use(express.errorHandler());
 }
 

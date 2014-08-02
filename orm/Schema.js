@@ -6,29 +6,16 @@ var extend = require("xtend");
 	var sequelize;
 	var entities = [];
 	var config;
-	
-	// sequelize.sync({
-	// force : true
-	// }).complete(function(err) {
-	// console.log( err );
-	// if (err) {
-	// console.log('An error occurred while creating the table:', err)
-	// } else {
-	// console.log('It worked!')
-	// }
-	// });
 
 	var that = {
-		register : function(entity) {
-
-		},
 
 		/**
 		 * dialect, schema, host, port, username, password
 		 */
 		connect : function(args) {
-			if( !args )
+			if( !args ){
 				args = {};
+			}
 			
 			var basecfg = {
 				dialect : "mysql",
@@ -36,7 +23,7 @@ var extend = require("xtend");
 				port : 3306,
 				logging : console.log,
 				sync : {
-					force : true
+					force : args.force === true
 				},
 				pool : {
 					maxConnections : 100,
@@ -45,27 +32,36 @@ var extend = require("xtend");
 			};
 			
 			config = extend( basecfg, args );
-			console.log( config );
 			sequelize = new Sequelize(config.schema, config.username, config.password, config);
 
 			sequelize.authenticate().complete(function(err) {
-				console.log((err ? "Error " + err + ".  Not" : "") + " Connected");
+				if( args.callback ){
+					args.callback(err, sequelize);
+				}
 			});
 		},
 		sync : function(args) {
 			sequelize.sync({
-				force : true
-			})
+				force : (args && args.force === true)
+			});
 		},
 		add : function(name, args) {
-			entities[name] = sequelize.define(name, args);
-			return entities[name];
+			entities[args.modelName || name] = sequelize.define(name, args);
+			return entities[args.modelName || name];
+		},
+		build : function(name, args){
+			return that.model(name).build(args);
+		},
+		model : function(name, args){
+			return sequelize.model(name);
 		},
 		entities : function(arr) {
-			if (!arr)
-				return entities
-			else
+			if (!arr){
+				return entities;
+			}
+			else{
 				entities = arr;
+			}
 		},
 		orm: function(){
 			return sequelize;
