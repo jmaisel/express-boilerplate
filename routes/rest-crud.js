@@ -4,26 +4,33 @@
 
 var express = require('express');
 var logger = require('winston');
-var Schema = require("../orm/Schema");
+
+function objectIdPair(entity, id, req, res){
+//	var table = Schema.entity(entity);
+//	
+//	table.find(id).success(function(model){
+//		
+//		if( model ){
+//			res.json(model);
+//		}
+//		
+//		else{
+//			res.json({err: "No data found."});
+//		}
+//	});
+}
 
 exports.list = function(req, res){
 	
 	res.set({'Content-Type' : "text/javascript"});
 	
-	var app = express();
 	var token = "/rest/";
-	var uri = req.path;
-	var tokens = uri.substring(token.length).split('/');
+	var tokens = req.path.substring(token.length).split('/');
+	var table = tokens[0];
+	var id = tokens[1];
 	
-	var table = Schema.entities()[tokens[0]];
-	table.find(parseInt(tokens[1])).success(function(model){
-		
-		if( model ){
-			res.json(model);
-		}
-		
-		else{
-			res.json({err: "No data found."});
-		}
-	});
+	objectIdPair(table, id, req, res);
 };
+
+
+

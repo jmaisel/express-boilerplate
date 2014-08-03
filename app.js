@@ -4,7 +4,7 @@
 var http = require('http');
 var path = require('path');
 var express = require('express');
-var winston = require('winston');
+var logger = require('winston');
 
 var routes = require('./routes');
 var user = require('./routes/user');
@@ -12,41 +12,39 @@ var template = require('./routes/template');
 var rest = require("./routes/rest-crud.js");
 var app = express();
 
-var Schema = require('./orm/Schema.js');
-var loadDomainModel = require('./orm/DataModel.js');
+var Database = require('./orm/DataModel.js');
+
+function success(){
+	console.log("complete:", arguments);
+}
 
 // Connect to the database
-Schema.connect({
+Database.connect({
 	schema: "boilerplate_dev",
 	username: "root",
 	password: "",
 	host: "localhost",
 	port: 3306,
 	dialect: "mysql",
-	logging: winston.info,
+	logging: logger.info,
 	callback: function(err){
-		winston.info((err ? "Error " + err + ".  Not" : "") + " Connected");
+		logger.info("Connected:", err);
 		
-		//*
-		if( err ){
-			return;
-		}
-		
-		var role = Schema.build('system_roles', {
-			name: "Administrators"
+		var role = Database.Role.build({name: "Administrators"});
+		role.save().success(function(e){
+			logger.info("role saved:", e);
+			
+			var user = Database.User.build({fname:"joe", system_roles_id: 1});
+			user.save().success(function(){
+//				Database.User.find(1).success(function(user){
+//					console.log(user);
+////					user.setRole(e);
+//				});
+			});
 		});
-		
-		role.save().complete(function(){
-			winston.info(err?"not saved " + err:"saved");
-		});
-
-		winston.info( role.get("name") );
-		//*/
 	}
 });
 
-loadDomainModel();
-Schema.sync();
 
 // set globals for all environments
 app.set('port', process.env.PORT || 3000);
@@ -74,5 +72,5 @@ app.get('/rest/*', rest.list);
 
 // start the server
 http.createServer(app).listen(app.get('port'), function() {
-	winston.info('Express server listening on port ' + app.get('port'));
+	logger.info('Express server listening on port ' + app.get('port'));
 });
