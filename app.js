@@ -14,10 +14,6 @@ var app = express();
 
 var Database = require('./orm/DataModel.js');
 
-function success(){
-	console.log("complete:", arguments);
-}
-
 // Connect to the database
 Database.connect({
 	schema: "boilerplate_dev",
@@ -33,6 +29,11 @@ Database.connect({
 		var role = Database.Role.build({name: "Administrators"});
 		role.save().success(function(e){
 			logger.info("role saved:", e);
+			
+			/**
+			 * can either set the fk id directly in the json using the col name, 
+			 * or lookup a persisted instance and call the appropriate setter
+			 */
 			
 			var user = Database.User.build({fname:"joe", system_roles_id: 1});
 			user.save().success(function(){

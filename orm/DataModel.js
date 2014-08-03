@@ -29,11 +29,12 @@ exports.connect = function(args){
 			}
 	};
 	
-	config = extend( basecfg, args );
+	var config = extend( basecfg, args );
 	logger.info("Initializing Sequelize:", config);
-	exports.orm = new Sequelize(config.schema, config.username, config.password, config);
 	
+	exports.orm = new Sequelize(config.schema, config.username, config.password, config);
 	exports.orm.authenticate().complete(function(err) {
+		
 		/**
 		 * Role
 		 */
@@ -63,7 +64,6 @@ exports.connect = function(args){
 				allowNull: true
 			}
 		});
-		
 		exports.Role.hasMany(exports.User, {as: 'role', foreignKey: 'system_roles_id'});
 		exports.User.belongsTo(exports.Role, {as: 'role', foreignKey: 'system_roles_id'});
 		
@@ -74,15 +74,15 @@ exports.connect = function(args){
 			title: Sequelize.STRING,
 			points: Sequelize.INTEGER,
 			content: Sequelize.TEXT,
-			user: {
+			system_user_id: {
 				field: "system_user_id",
 				type: Sequelize.INTEGER,
 				references: "system_users",
 				referencesKey: "id"
 			}
 		});
-//		exports.Post.hasMany(exports.User, {as: 'user', foreignKey: 'system_user_id'});
-//		exports.User.belongsTo(exports.Post, {as: 'user', foreignKey: 'system_user_id'});
+		exports.User.hasMany(exports.Post, {as: 'user', foreignKey: 'system_user_id'});
+		exports.Post.belongsTo(exports.User, {as: 'post', foreignKey: 'system_user_id'});
 		
 		/**
 		 * Comments
@@ -90,31 +90,41 @@ exports.connect = function(args){
 		exports.Comment = exports.orm.define('blog_comments', {
 			content: Sequelize.STRING,
 			points: Sequelize.INTEGER,
-			parent: {
-				field: "parent_id",
+			post_id: {
+				field: "post_id",
+				type: Sequelize.INTEGER,
+				references: "blog_posts",
+				referencesKey: "id"
+			},
+			parent_comment_id: {
+				field: "parent_comment_id",
 				type: Sequelize.INTEGER,
 				references: "blog_comments",
 				referencesKey: "id"
 			},
-			user: {
+			system_user_id: {
 				field: "user_id",
 				type: Sequelize.INTEGER,
 				references: "system_users",
 				referencesKey: "id"
 			}
 		});
+		exports.Post.hasMany(exports.Comment, {as: 'post', foreignKey: 'post_id'});
+		exports.Comment.belongsTo(exports.Post, {as: 'comments', foreignKey: 'parent_comment_id'});
+		exports.Comment.hasOne(exports.Comment, {as: 'parent', foreignKey: 'parent_comment_id'});
+		exports.Comment.belongsTo(exports.User, {as: 'user', foreignKey: 'system_user_id'});
+		exports.User.hasMany(exports.Comment, {as: 'comments', foreignKey: 'system_user_id'});
 		
-		exports.Post.hasMany(exports.Comment, {as: 'post', foreignKey: 'system_post_id'});
-		exports.Comment.belongsTo(exports.Post, {as: 'role', foreignKey: 'system_roles_id'});
 		
-		logger.info("initial sync");
+		logger.info("Initial sync.....");
 		exports.orm.sync({
 			force : (args && args.force === true)
 		}).complete(function(e){
-			logger.info("sync complete");
+			logger.info("......sync complete");
 			
-			if( args.callback )
+			if( args.callback ){
 				args.callback(true);
+			}
 		});
 	});
 };
