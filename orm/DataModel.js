@@ -16,17 +16,17 @@ exports.connect = function(args){
 	}
 	
 	var basecfg = {
-			dialect : "mysql",
-			host : 'localhost',
-			port : 3306,
-			logging : logger.info,
-			sync : {
-				force : args.force === true
-			},
-			pool : {
-				maxConnections : 100,
-				minConnections : 10
-			}
+		dialect : "mysql",
+		host : 'localhost',
+		port : 3306,
+		logging : logger.info,
+		sync : {
+			force : args.force === true
+		},
+		pool : {
+			maxConnections : 100,
+			minConnections : 10
+		}
 	};
 	
 	var config = extend( basecfg, args );
@@ -56,16 +56,16 @@ exports.connect = function(args){
 				type:Sequelize.STRING,
 				unique:true
 			},
-			system_roles_id: {
-				field: "system_roles_id",
+			system_role_id: {
+				field: "system_role_id",
 				type: Sequelize.INTEGER,
 				references: 'system_roles',
 				referencesKey: 'id',
 				allowNull: true
 			}
 		});
-		exports.Role.hasMany(exports.User, {as: 'role', foreignKey: 'system_roles_id'});
-		exports.User.belongsTo(exports.Role, {as: 'role', foreignKey: 'system_roles_id'});
+		exports.Role.hasMany(exports.User, {as: 'role', foreignKey: 'system_role_id'});
+		exports.User.belongsTo(exports.Role, {as: 'role', foreignKey: 'system_role_id'});
 		
 		/**
 		 * Posts

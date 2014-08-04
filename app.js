@@ -23,7 +23,7 @@ Database.connect({
 	port: 3306,
 	dialect: "mysql",
 	logging: logger.info,
-	callback: function(err){
+	callback1: function(err){
 		logger.info("Connected:", err);
 		
 		var role = Database.Role.build({name: "Administrators"});
@@ -35,12 +35,12 @@ Database.connect({
 			 * or lookup a persisted instance and call the appropriate setter
 			 */
 			
-			var user = Database.User.build({fname:"joe", system_roles_id: 1});
+			var user = Database.User.build({fname:"joe"});//, system_role_id: 1});
 			user.save().success(function(){
-//				Database.User.find(1).success(function(user){
+				Database.User.find(1).success(function(user){
 //					console.log(user);
-////					user.setRole(e);
-//				});
+					user.setRole(e);
+				});
 			});
 		});
 	}
@@ -67,9 +67,13 @@ if ('development' === app.get('env')) {
 
 // bind handlers to uris
 app.get('/', routes.index);
-app.get('/users', user.list);
 app.get('/template/*', template.list);
-app.get('/rest/*', rest.list);
+
+app.get('/rest/*', rest.find);
+app.post('/rest/*', rest.create);
+app.put('/rest/*', rest.update);
+app.delete('/rest/*', rest.del);
+
 
 // start the server
 http.createServer(app).listen(app.get('port'), function() {
